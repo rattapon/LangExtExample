@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,13 +9,55 @@ using LangExt; //Install from NuGet
 
 namespace LangExtExample
 {
-    class Program
+    public class Program
     {
         static void Main(string[] args)
         {
             PlayAroundFunction();
+            PlayAroundSeq();
             Console.ReadLine();
         }
+
+        private static void PlayAroundSeq()
+        {
+            Console.WriteLine("==================== Seq ====================");
+            var fruits = new[] { "Mango", "Melon", "Durian", "Strawberry", "Kiwi", "Cherry", "Plum" };
+            var numbers = new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            var fruitsSeq = Seq.Create(fruits);
+            var numSeq = Seq.Create(numbers);
+            Console.WriteLine(fruitsSeq);
+            Console.WriteLine(numSeq);
+            Func<int, int> add1 = a => a + 1;
+            var first100 = Seq.Init(100, add1);
+            Console.WriteLine("{0} has {1} elements", first100, first100.Count());
+            var repeated = Seq.Repeat(10, "A");
+            Console.WriteLine("{0} has {1} elements", repeated, repeated.Count());
+            var numInfinite = Seq.InitInfinite(add1);
+            var take200 = numInfinite.Take(200);
+            //Cannot count the infinite Seq, unless result in infinite loop
+            //Console.WriteLine("Infinite Seq {0} has {1} elements", numInfinite, numInfinite.Count());
+            Console.WriteLine("{0} is infinite Seq", numInfinite);
+            Console.WriteLine("{0} has {1} elements", take200, take200.Count());
+
+            Seq.Iter(fruitsSeq, a => Console.WriteLine("{0} is {1}", a, a.ToLower().Contains("e") ? "delicious" : "not tasty"));
+            fruitsSeq.Iter(a => Console.WriteLine("{0} is {1}", a, a.ToLower().Contains("durian") ? "a king of fruits" : "so so"));
+
+            var zip1 = Seq.Zip(fruitsSeq, numSeq, repeated);
+            Console.WriteLine("{0} type of {1}", zip1, zip1.GetType());
+            Seq.Iter(zip1, a => Console.WriteLine("{0}", a));
+
+            var unzip1 = Seq.Unzip(zip1);
+            Console.WriteLine(unzip1);
+            unzip1.Item1.Iter(s => Console.WriteLine("{0} is {1}", s.ToString(), s is string ? "String" : "!String"));
+            Action<string> writeLine = Console.WriteLine;
+            var filterMapO = Seq.Filter(fruitsSeq, s => s.ToLower().Contains("o")).Map(a => String.Concat(a, @" has ""o"" or ""O"" character"));
+            filterMapO.Iter(writeLine);
+
+            Console.WriteLine("Sort : {0}", Seq.SortBy(fruitsSeq, a => a));
+            Console.WriteLine("Revert Sort : {0}", Seq.RevSortBy(fruitsSeq, a => a));
+
+        }
+        
 
         private static void PlayAroundFunction()
         {
@@ -41,4 +84,5 @@ namespace LangExtExample
             Console.WriteLine();
         }
     }
+
 }
