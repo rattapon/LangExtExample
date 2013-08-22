@@ -3,19 +3,91 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
-using LangExt; //Install from NuGet
+using LangExt;
+using Enumerable = System.Linq.Enumerable;
+
+//Install from NuGet
 
 namespace LangExtExample
 {
+    public enum Nationality
+    {
+        Thai,
+        Japanese,
+    }
+
     public class Program
     {
         static void Main(string[] args)
         {
             PlayAroundFunction();
             PlayAroundSeq();
+            PlayAroundOption();
             Console.ReadLine();
+        }
+
+        private static void PlayAroundOption()
+        {
+            Console.WriteLine("==================== Option ====================");
+            
+            var thai = Create.Option(Nationality.Thai);
+            var japanese = Create.Option(Nationality.Japanese);
+            var nullOption = Create.Option<Nationality>(null);
+            Console.WriteLine("{0} is {1}", thai, thai.IsSome ? "Some" : "None");
+            Console.WriteLine("{0} is {1}", japanese, japanese.IsSome ? "Some" : "None");
+            Console.WriteLine("{0} is None = {1}", nullOption, nullOption.IsNone);
+            Console.WriteLine("{0} if Thai",Nationality.Thai.ToString().NoneIf("Thai"));
+            string nullStr = null;
+            Console.WriteLine("{0} if null", nullStr.NoneIfNull());
+
+            Func<string, Nationality> func = a =>
+            {
+                switch (a.ToLower())
+                {
+                    case "thai":
+                        return Nationality.Thai;
+                    case "japanese":
+                        return Nationality.Japanese;
+                    default:
+                        throw new Exception();
+                }
+            };
+
+            Console.WriteLine(Option.FromFunc(() => func("Thai")));
+            Console.WriteLine(Option.FromFunc(() => func("THAI")));
+            Console.WriteLine(Option.FromFunc(() => func("japanese")));
+            Console.WriteLine(Option.FromFunc(() => func("Chinese")));
+
+            var emptyOption = new Option<int>();
+            Console.WriteLine("{0} is None : {1}", emptyOption.GetType(), emptyOption.IsNone);
+
+            var sizes = new[] {"S", "M", "L", "XL", "", null};
+            foreach (var option in Enumerable.Select(sizes, Create.Option))
+            {
+                Console.WriteLine(option.GetOr("F"));
+                Console.WriteLine(option.GetOrElse(() => "No option ==> Do this instead"));
+                Console.WriteLine("{0} is Some {1}", option, option.Match(
+                    Some: v => true,
+                    None: () => false));
+                option.Match(
+                    Some: v => Console.WriteLine("{0} do something", v),
+                    None: () => Console.WriteLine("None do nothing"));
+
+                if (option == Option.Some("XL")) Console.WriteLine("You're overweight, do more exercise!!!");
+                else Console.WriteLine("Skinny!!");
+
+                Console.WriteLine(option.Maybe("F", v => string.Format("{0} is a Valid Size", v)));
+            }
+
+            //Fold?
+            var opt = Option.Some("abcd");
+            Console.WriteLine("Fold : {0}", opt.Fold("efgh", (a, b) => string.Concat(a, b)));
+
+          
+            Console.WriteLine();
         }
 
         private static void PlayAroundSeq()
@@ -56,6 +128,7 @@ namespace LangExtExample
             Console.WriteLine("Sort : {0}", Seq.SortBy(fruitsSeq, a => a));
             Console.WriteLine("Revert Sort : {0}", Seq.RevSortBy(fruitsSeq, a => a));
 
+            Console.WriteLine();
         }
         
 
