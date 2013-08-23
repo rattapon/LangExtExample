@@ -6,10 +6,10 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
 using System.Threading.Tasks;
-using LangExt;
+using LangExt; //Install from NuGet
 using Enumerable = System.Linq.Enumerable;
 
-//Install from NuGet
+
 
 namespace LangExtExample
 {
@@ -23,10 +23,43 @@ namespace LangExtExample
     {
         static void Main(string[] args)
         {
-            PlayAroundFunction();
-            PlayAroundSeq();
-            PlayAroundOption();
+            //PlayAroundFunction();
+            //PlayAroundSeq();
+            //PlayAroundOption();
+            PlayAroundMaybeMonad();
             Console.ReadLine();
+        }
+
+        private static void PlayAroundMaybeMonad()
+        {
+            Console.WriteLine("==================== Maybe Monad ====================");
+            var mTen = Option.Some(10);
+            Func<int, string> makeString = n => string.Format("({0})", n);
+
+            var result = mTen.Bind(n => Option.Some(makeString(10)));
+            Console.WriteLine(result);
+
+            var mNone = Option.None;
+            var mTwenty = Option.Some(20);
+            Func<int, int, int> multiply = (n1, n2) => n1*n2;
+
+            var multiplyList = from ten in mTen
+                from twenty in mTwenty
+                select multiply(ten, twenty);
+
+            Console.WriteLine(multiplyList);
+
+            var multiplyNone = from ten in mTen
+                from none in (Option<int>) mNone
+                select multiply(ten, none);
+
+            Console.WriteLine(multiplyNone);
+
+
+
+
+
+
         }
 
         private static void PlayAroundOption()
