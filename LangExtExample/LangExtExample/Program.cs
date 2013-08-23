@@ -27,7 +27,28 @@ namespace LangExtExample
             //PlayAroundSeq();
             //PlayAroundOption();
             PlayAroundMaybeMonad();
+            PlayAroundSeqMonad();
             Console.ReadLine();
+        }
+
+        private static void PlayAroundSeqMonad()
+        {
+            Console.WriteLine("==================== Seq Monad ====================");
+
+            var mNums1 = Seq.Init(5, i => i + 1);
+            var mNums2 = new[] {"A", "B", "C", "D", "E", "F"}.ToSeq();
+
+            Func<int, string, string> multipleNumber = (n1, n2) => string.Concat(n1, n2);
+
+            var result =
+                    from num1 in mNums1
+                    from num2 in mNums2
+                    select multipleNumber(num1, num2);
+
+            Console.WriteLine(result);
+            result.ToSeq().Iter(n => Console.Write("{0}", n));
+            Console.WriteLine();
+
         }
 
         private static void PlayAroundMaybeMonad()
@@ -54,11 +75,6 @@ namespace LangExtExample
                 select multiply(ten, none);
 
             Console.WriteLine(multiplyNone);
-
-
-
-
-
 
         }
 
