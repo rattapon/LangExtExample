@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.Serialization.Formatters;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LangExt; //Install from NuGet
 using Enumerable = System.Linq.Enumerable;
@@ -26,28 +27,60 @@ namespace LangExtExample
             //PlayAroundFunction();
             //PlayAroundSeq();
             //PlayAroundOption();
-            PlayAroundMaybeMonad();
-            PlayAroundSeqMonad();
+            //PlayAroundMaybeMonad();
+            //PlayAroundSeqMonad();
+            PlayAroundEitherMonad(); 
             Console.ReadLine();
+        }
+
+        private static void PlayAroundEitherMonad()
+        {
+            var exec1 = from x in 0.ToExceptional()
+                       from y in Exceptional.Execute(() => 6 / x)
+                       from z in 7.ToExceptional()
+                       select x + y + z;
+            Console.WriteLine("Exceptional Result 1: " + exec1);
+
+            var exec2 = Exceptional.From(0)
+                       .ThenExecute(x => x + 6 / x)
+                       .ThenExecute(y => y + 7);
+            Console.WriteLine("Exceptional Result 2: " + exec2);
+
+            var exec3 = Exceptional.From(3)
+                       .ThenExecute(x => x + 6 / x)
+                       .ThenExecute(y => y + 7);
+            Console.WriteLine("Exceptional Result 3: " + exec3);
+            
         }
 
         private static void PlayAroundSeqMonad()
         {
             Console.WriteLine("==================== Seq Monad ====================");
 
-            var mNums1 = Seq.Init(5, i => i + 1);
-            var mNums2 = new[] {"A", "B", "C", "D", "E", "F"}.ToSeq();
+            var mNum = Seq.Init(5, i => i + 1);
+            var mChar = new[] {"A", "B", "C", "D", "E", "F"}.ToSeq();
 
-            Func<int, string, string> multipleNumber = (n1, n2) => string.Concat(n1, n2);
+            Func<int, string, string> concat = (n1, n2) => string.Concat(n1, n2);
 
             var result =
-                    from num1 in mNums1
-                    from num2 in mNums2
-                    select multipleNumber(num1, num2);
+                    from num1 in mNum
+                    from character in mChar
+                    select concat(num1, character);
 
             Console.WriteLine(result);
             result.ToSeq().Iter(n => Console.Write("{0}", n));
             Console.WriteLine();
+
+            Func<int, string> convertToString = n => string.Format("*{0}*", n);
+            var bindResult = mNum.Bind(n => Seq.Create(convertToString(n)));
+            Console.WriteLine("{0} : {1}", bindResult, bindResult.Count());
+            foreach (var item in bindResult)
+            {
+                Console.WriteLine("{0} ", item);
+            }
+
+            var num100 = Seq.Init(100, i => i + 1);
+            num100.Where(a => a%5 == 0).SelectMany(n => Seq.Singleton(convertToString(n))).ToSeq().Iter(s => Console.WriteLine(s));
 
         }
 
