@@ -29,8 +29,17 @@ namespace LangExtExample
             //PlayAroundOption();
             //PlayAroundMaybeMonad();
             //PlayAroundSeqMonad();
-            PlayAroundEitherMonad(); 
+            PlayAroundEitherMonad();
+            PlayMaybeFromEricExample();
             Console.ReadLine();
+        }
+
+        private static void PlayMaybeFromEricExample()
+        {
+            Console.WriteLine("==================== Maybe Monad from Eric's example ====================");
+            Console.WriteLine(1.Unit().QuerySyntax());
+            Console.WriteLine(1000.Unit().QuerySyntax());
+            Console.WriteLine(Maybe<int>.Null.QuerySyntax());
         }
 
         private static void PlayAroundEitherMonad()
