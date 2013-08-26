@@ -15,6 +15,12 @@ type MaybeBuilder() =
      member this.Delay (f) = f()
      member this.Return (x: 'a) : Maybe<'a> = Just x
 
+type Either<'a, 'b> =
+    | Success of 'a
+    | Fail of 'b
+
+type either<'a, 'b> = Either<'a, 'b>
+
 let playMaybe () =
     let maybe = new MaybeBuilder()
     let add a b = 
@@ -27,12 +33,24 @@ let playMaybe () =
 
     let successResult = add 20 30
     let failResult = add 100 -10
-    Console.WriteLine("{0}", successResult)
-    Console.WriteLine("{0}", failResult)
+    printfn "%A" successResult
+    printfn "%A" failResult
+
+let playEither () = 
+    let devide x = function
+        | y when y = 0 -> Fail(ArgumentException "Divide by zoro!")
+        | y -> Success(x/y)
+
+    let success = devide 10 2
+    let fail = devide 20 0
+    printfn "%A" success
+    printfn "%A" fail
+
         
 
 [<EntryPoint>]
 let main argv = 
     playMaybe()        
+    playEither()
     Console.ReadLine() |> ignore  
     0// return an integer exit code
